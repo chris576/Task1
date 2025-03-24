@@ -8,3 +8,10 @@ def write(to_be_written, file_name="structure.txt"):
 def read(filename="structure.txt"):
     with(open(filename, 'r')) as file: 
         return json.loads(file.read())
+
+def print_blocks(block_string):
+    blocks = block_string.split(' ')
+    out = ""
+    for i, block in enumerate(blocks, start=0):
+        out += f"{block}" + " " + f"{i}" + "  "
+    print(out)

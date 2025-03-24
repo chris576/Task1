@@ -19,7 +19,7 @@ def frequency_count(cipher, n=1):
 
 
 # returns dicts for n ngram. key is the string with size of n and value is the relative frequency.
-def frequency_analysis(cipher: str, ngram: int)->[]: 
+def frequency_analysis(cipher: str, ngram: int): 
     rtn = []
     rtn.extend([frequency_count(cipher, i+1) for i in range(ngram)])
     return rtn

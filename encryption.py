@@ -10,3 +10,9 @@ def translate(cipher: str, dict: dict, n=1)->str:
         else:
             results += cipher[index]
     return results
+
+def final_dict_is_regular(final_dict: dict) -> bool:
+    values = list(final_dict.values())
+    if len(values) != len(set(values)):
+        return False
+    return True

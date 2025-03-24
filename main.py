@@ -5,57 +5,47 @@ import utils as ut
 import parser
 
 import json
+import random
+import multiprocessing
 
 cipher = ut.read_and_clean_text('CIPHER.txt')
 comparison = ut.read_and_clean_text('cmp.txt')
 
-generate_structure = input("Use existing strucutre.txt or generate new? You need a CIPHER.txt and cmp.txt. There will be the frequency analysis. May take 5 to 10 minutes to generate.\nYes/No")
-
-if generate_structure == "yes": 
-    data = fa.get_ngram_dict_sorted_probability(cipher, comparison, 4)
-    parser.write(data)
-
 analysis_dict = parser.read()
 
-final_dict = { char: '_' for char in list(map(chr,range(ord('A'),ord('Z')+1))) }
+characters_to_translate = len(cipher)
 
-characters_to_translate = int(input("How much characters do you want to use for encryption?"))
 
-while True:         
-    c_cipher = cipher[:characters_to_translate]
+def worker():
+    final_dict = { char: '_' for char in ['G', 'N', 'L', 'J', 'M', 'R', 'A', 'U', 'X', 'B', 'C', 'D', 'K', 'V', 'Y', 'S', 'E', 'I', 'F', 'H', 'W', 'O', 'Z', 'T'] }
     
-    print("The Cipher to translate: ")
-    print(ut.group_in_blocks(c_cipher, 4))
-    print("The translation: ")
-    print(ut.group_in_blocks(en.translate(c_cipher, final_dict, 1), 4))
-    
-    ngram = input("What ngram (1-4) would you like to translate?")
-    index = int(input("What index? (0-19)"))
-    
-    citext = c_cipher[index:index+int(ngram)]
-    print("Citext: ", citext)
-    translation = '_'
+    while True:
+        ngram = str(random.randint(2, 3))
+        index = random.randint(0, characters_to_translate - int(ngram))
         
-    using = ""
-    t = 0
-    while using != "yes" and using!="exit" and t <= len(analysis_dict[ngram][citext])-1:
+        citext = cipher[index:index+int(ngram)]
+        translation = '_'        
+        
+        t = random.randint(0, 10)
+        
         translation = analysis_dict[ngram][citext][t]
-        final_dict_cp = deepcopy(final_dict)
-        for i in range(len(citext)): 
-            final_dict_cp[citext[i]] = translation[i]
-        
-        print("The translation: ")
-        print(ut.group_in_blocks(en.translate(c_cipher, final_dict_cp, 1), 4))
-        print(translation)
-        t+=1
-        using = input("Use this? (yes/no/exit)")           
 
-    for i in range(len(citext)): 
-        final_dict[citext[i]] = translation[i]
+        for i in range(len(citext)): 
+            final_dict[citext[i]] = translation[i]
         
-    if using == "exit": 
-        print("Solution: ")
-        print(ut.group_in_blocks(en.translate(c_cipher, final_dict, 1), 4))
-        print("\n")
-        print(final_dict)
-        break
+        number = 1
+        if en.final_dict_is_regular(final_dict):
+            with open(f'solution_{number}_{random.randint(0, 100)}.txt', 'w') as file:
+                file.write(json.dumps(final_dict))
+                file.write(json.dumps(en.translate(cipher, final_dict)))
+            number += 1
+
+if __name__ == '__main__':
+    processes = []
+    for _ in range(multiprocessing.cpu_count()):
+        p = multiprocessing.Process(target=worker)
+        p.start()
+        processes.append(p)
+
+    for p in processes:
+        p.join()
